@@ -1,12 +1,13 @@
+
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from pydantic import BaseModel 
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import create_tool_calling_agent, AgentExecutor
+from tools import search_tool, wiki_tool, save_tool
 
 load_dotenv()
-
 #Define a Python class whioch will specigy the type of content that we want our LLM to generate
 class ResearchResponse(BaseModel):
     topic: str
@@ -15,7 +16,8 @@ class ResearchResponse(BaseModel):
     tools_used: list[str]
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash-lite",
+    model="gemini-2.5-flash",
+    #model="gemini-2.5-flash-lite",
     temperature=0
 )
 
@@ -37,16 +39,17 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 ).partial(format_instructions=parser.get_format_instructions())
 
-agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools = [])
-agent_executor = AgentExecutor(agent=agent, tools = [], verbose=True)
+tools = [search_tool, wiki_tool, save_tool]
 
-raw_response = agent_executor.invoke({"query": "What is the impact of climate change on polar bears?"})
-#print(raw_response)
+agent = create_tool_calling_agent(llm=llm, prompt=prompt, tools = tools)
+agent_executor = AgentExecutor(agent=agent, tools = tools, verbose=True)
+
+query = input("What can I help you research today? ")
+raw_response = agent_executor.invoke({"query": query})
 
 try:
-    structured_response = parser.parse(raw_response.get("output")[0]["text"])
+    structured_response = parser.parse(raw_response["output"])
+    print(structured_response)
 except Exception as e:
     print("Error parsing response:", e, "Raw response ->", raw_response)
     structured_response = None  
-
-print(structured_response.tools_used)
