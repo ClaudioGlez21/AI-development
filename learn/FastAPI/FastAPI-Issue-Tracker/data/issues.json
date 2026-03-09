@@ -1,0 +1,16 @@
+[
+  {
+    "id": "7bd0b3d1-6d82-415d-b5e2-b61da533e5f9",
+    "title": "Issue 1",
+    "description": "Updated issue test",
+    "priority": "medium",
+    "status": "open"
+  },
+  {
+    "id": "c85cebea-33e7-467a-8f37-202d1923838c",
+    "title": "Issue 2",
+    "description": "This is another test",
+    "priority": "medium",
+    "status": "open"
+  }
+] 
